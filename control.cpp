@@ -26,14 +26,23 @@ void spdPID();
 void dirPID();
 void breakSensing();
 void PID();
-void setMotorSpeedRight();
-void setMotorSpeedLeft();
+void setMotorSpeedRight(int Rspeed){
+    RDutyCycle = Rspeed;
+}
+void setMotorSpeedLeft(int Lspeed){
+    LDutyCycle = Lspeed;
+}
 
 void onLineBreak(float* prevRspeed, float* prevLspeed){            //interrupt (isLineBroken()==1)
                                                         
         setMotorSpeedRight(*prevRspeed);
         setMotorSpeedLeft(*prevLspeed); 
 }
+
+
+
+
+
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
