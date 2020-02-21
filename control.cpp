@@ -8,8 +8,9 @@ float latestError;
 float error[20] = 0;
 float change;
 
-void getEncoderLeft();
-void getEncoderRight();
+
+void getLeftEncValue();
+void getRightEncValue();
 
 void calError(){
     latestError= 1000x(1*LL_GPIO_read1+2*LL_GPIO_read2+3*LL_GPIO_read3+4*LL_GPIO_read4+5*LL_GPIO_read5+6*LL_GPIO_read6)/(LL_GPIO_read1+LL_GPIO_read2+LL_GPIO_read3+LL_GPIO_read4+LL_GPIO_read5+LL_GPIO_read6);
@@ -26,8 +27,14 @@ void isLineBroken(float sensorVal,float* prevRspeed,float* prevLspeed)          
     }
 }
 
-void calSpeedLeft();
-void calSpeedRight();
+void calSpeedLeft(){
+    int RPS =  getLeftEncValue()*(2*M_PI/1000);
+    int MPS = RPS * 2*M_PI*radius;
+}
+void calSpeedRight(){
+    int RPS =  getRightEncValue()*(2*M_PI/1000);
+    int MPS = RPS * 2*M_PI*radius;
+}
 int isLineMid(int sensorVal, int* LED)
 {
     if(sensorVal<=5000 && sensorVal>=3000){
