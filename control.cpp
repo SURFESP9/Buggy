@@ -53,7 +53,7 @@ float ErrorDif(){
 
 
 void PID(){
-    change = (Kp*error)+Ki*(ErrorIntegral())+Kd*ErrorDif();
+    change = (Kp*error[20])+Ki*(ErrorIntegral())+(Kd*ErrorDif());
 }
 
 void setMotorSpeedRight(int Rspeed){
