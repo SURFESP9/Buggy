@@ -3,9 +3,21 @@
 
 
 const float radius = 0.07;
+float Kp, Ki, Kd;
+fload latestError;
+float error[20] = 0;
+float change;
 
 void getEncoderLeft();
 void getEncoderRight();
+
+void calError(){
+    latestError= 1000x(1*LL_GPIO_read1+2*LL_GPIO_read2+3*LL_GPIO_read3+4*LL_GPIO_read4+5*LL_GPIO_read5+6*LL_GPIO_read6)/(LL_GPIO_read1+LL_GPIO_read2+LL_GPIO_read3+LL_GPIO_read4+LL_GPIO_read5+LL_GPIO_read6);
+    ...        // address shifting
+}
+
+
+
 void isLineBroken(float sensorVal,float* prevRspeed,float* prevLspeed)                            //interrupt
 {
     if(sensorVal <= 100)                    //100 is temporary value. later change with calculated line value
@@ -26,10 +38,28 @@ int isLineMid(int sensorVal, int* LED)
 void spdPID();
 void dirPID();
 void breakSensing();
-void PID();
+
+float ErrorIntegral(){
+    float value=0;
+    for(int i=0; i<20; i++){
+        value += error[i];
+    }
+    return value;
+}
+
+float ErrorDif(){
+    return (error[20]-error[19]);
+}
+
+
+void PID(){
+    change = (Kp*error)+Ki*(ErrorIntegral())+Kd*ErrorDif();
+}
+
 void setMotorSpeedRight(int Rspeed){
     RDutyCycle = Rspeed;
 }
+
 void setMotorSpeedLeft(int Lspeed){
     LDutyCycle = Lspeed;
 }
