@@ -1,20 +1,28 @@
 #include <iostream>
 #include <math.h>
 
-
+const int noSensor = 6
 const float radius = 0.07;
+int noErrorBuf = 20;
 float Kp, Ki, Kd;
 float latestError;
-float error[20] = 0;
+float error[noErrorBuf] = 0;
 float change;
+
 
 
 void getLeftEncValue();
 void getRightEncValue();
 
-void calError(){
-    latestError= 1000x(1*LL_GPIO_read1+2*LL_GPIO_read2+3*LL_GPIO_read3+4*LL_GPIO_read4+5*LL_GPIO_read5+6*LL_GPIO_read6)/(LL_GPIO_read1+LL_GPIO_read2+LL_GPIO_read3+LL_GPIO_read4+LL_GPIO_read5+LL_GPIO_read6);
-    ...        // address shifting
+void calError() {
+    latestError =
+            1000x(1 * LL_GPIO_read1 + 2 * LL_GPIO_read2 + 3 * LL_GPIO_read3 + 4 * LL_GPIO_read4 + 5 * LL_GPIO_read5 +
+                  6 * LL_GPIO_read6) /
+            (LL_GPIO_read1 + LL_GPIO_read2 + LL_GPIO_read3 + LL_GPIO_read4 + LL_GPIO_read5 + LL_GPIO_read6)-4500;
+    for (int i = 0; i < noErrorBuf-1; i++) {
+        error[i-1]=error[i];                                                             // address shifting
+    }
+    error[noErrorBuf-1] = latestError;
 }
 
 
@@ -33,7 +41,7 @@ void calSpeedLeft(){
 }
 void calSpeedRight(){
     int RPS =  getRightEncValue()*(2*M_PI/1000);
-    int MPS = RPS *radius;
+    int MPS = RPS * radius;
 }
 int isLineMid(int sensorVal, int* LED)
 {
@@ -48,7 +56,7 @@ void breakSensing();
 
 float ErrorIntegral(){
     float value=0;
-    for(int i=0; i<20; i++){
+    for(int i=0; i<noErrorBuf; i++){
         value += error[i];
     }
     return value;
