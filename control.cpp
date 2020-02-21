@@ -29,11 +29,11 @@ void isLineBroken(float sensorVal,float* prevRspeed,float* prevLspeed)          
 
 void calSpeedLeft(){
     int RPS =  getLeftEncValue()*(2*M_PI/1000);
-    int MPS = RPS * 2*M_PI*radius;
+    int MPS = RPS * radius;
 }
 void calSpeedRight(){
     int RPS =  getRightEncValue()*(2*M_PI/1000);
-    int MPS = RPS * 2*M_PI*radius;
+    int MPS = RPS *radius;
 }
 int isLineMid(int sensorVal, int* LED)
 {
