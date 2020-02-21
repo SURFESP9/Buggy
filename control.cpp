@@ -4,7 +4,7 @@
 
 const float radius = 0.07;
 float Kp, Ki, Kd;
-fload latestError;
+float latestError;
 float error[20] = 0;
 float change;
 
