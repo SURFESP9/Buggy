@@ -8,6 +8,9 @@ float Kp, Ki, Kd;
 float latestError;
 float error[noErrorBuf] = 0;
 float change;
+float desiredSpdVal = 100;
+float LSpd, RSpd;
+float prevRSpd[20], prevLSpd[20];
 
 
 
@@ -40,7 +43,15 @@ void calError() {
 }
 
 void PID(){
-    change = (Kp*error[20])+Ki*(ErrorIntegral())+(Kd*ErrorDif());
+    change = (Kp*error[noErrorBuf-1])+Ki*(ErrorIntegral())+(Kd*ErrorDif());
+}
+
+
+void spdPID(){
+    float LeftSpeedError = LSpd - desiredSpdVal;
+    float RightSpeedError = RSpd - desiredSpdVal;
+
+    //float speedChange = (Kp*error[noErrorBuf-1])+Ki*(ErrorIntegral())+(Kd*ErrorDif());
 }
 
 void setMotorSpeed(int change){
@@ -66,8 +77,6 @@ int isLineMid(int sensorVal, int* LED)                          //ticker
     }
 }
 
-void spdPID();
-void dirPID();
 
 float ErrorIntegral(){
     float value=0;
