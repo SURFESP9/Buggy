@@ -3,29 +3,59 @@
 
 const int noSensor = 6
 const float radius = 0.07;
+int latestNum = 0;
 int noErrorBuf = 20;
 float Kp, Ki, Kd;
+float SKp, SKi, SKd;
 float latestError;
 float error[noErrorBuf] = 0;
+float leftSpeedError[noErrorBuf] = 0;
+float rightSpeedError[noErrorBuf] = 0;
 float change;
 float desiredSpdVal = 100;
 float LSpd, RSpd;
 float prevRSpd[20], prevLSpd[20];
+float leftSpeedChange = 0;
+float rightSpeedChange = 0;
+
+
+
+void isLineBroken(float sensorVal,float* prevRspeed,float* prevLspeed){};
+void calError() {};
+void calSpdError(){};
+void PID(){};
+void spdPID(){};
+void setMotorSpeed(int change){};
+void calSpeedLeft(){};
+void calSpeedRight(){};
+int isLineMid(int sensorVal, int* LED){};
+float errorIntegral(){};
+float errorDif(){};
+float leftSpeedErrorIntegral(){};
+float leftSpeedErrorDif(){};
+float rightSpeedErrorIntegral(){};
+float rightSpeedErrorDif(){};
+void setMotorSpeedRight(int Rspeed){};
+void setMotorSpeedLeft(int Lspeed){};
+void onLineBreak(float* prevRspeed, float* prevLspeed){};
+
+
 
 
 
 void getLeftEncValue();
 void getRightEncValue();
 
+
 void isLineBroken(float sensorVal,float* prevRspeed,float* prevLspeed)                            //interrupt ticker
 {
     int cnt;
-    for(int i=1; i<=noSensor;i++) {
-         if(LL_GPIO_read(i) > 500)
+    for(int i=0; i<=noSensor - 1;i++) {
+         if(LL_GPIO_read(i) > 2000)
              cnt++;
     }
 
-    if(cnt < 2)                    //100 is temporary value. later change with calculated line value
+    if(cnt < 1)
     {
          onLineBreak();
     }
@@ -37,28 +67,42 @@ void calError() {
                   6 * LL_GPIO_read6) /
             (LL_GPIO_read1 + LL_GPIO_read2 + LL_GPIO_read3 + LL_GPIO_read4 + LL_GPIO_read5 + LL_GPIO_read6)-3500;
     for (int i = 0; i < noErrorBuf-1; i++) {
-        error[i-1]=error[i];                                                             // address shifting
+        error[i+1]=error[i];                                                             // address shifting
     }
-    error[noErrorBuf-1] = latestError;
+    error[latestNum] = latestError;
 }
 
-void PID(){
-    change = (Kp*error[noErrorBuf-1])+Ki*(ErrorIntegral())+(Kd*ErrorDif());
+void calSpdError(){
+    for (int i = 0; i < noErrorBuf-1; i++) {
+        leftSpeedError[i+1]=leftSpeedError[i];
+        rightSpeedError[i+1] = rightSpeedError[i];
+    }
+    leftSpeedError[latestNum] = LSpd - desiredSpdVal;
+    rightSpeedError[latestNum] = RSpd - desiredSpdVal;
+
 }
+
+
+void PID(){
+    change = (Kp*error[latestNum])+Ki*(errorIntegral())+(Kd*errorDif());
+}
+
 
 
 void spdPID(){
-    float LeftSpeedError = LSpd - desiredSpdVal;
-    float RightSpeedError = RSpd - desiredSpdVal;
+    leftSpeedChange = (SKp*leftSpeedError[latestNum])+(SKi*leftSpeedErrorIntegral())+(SKd*leftSpeedErrorDif());
+    rightSpeedChange = (SKp*rightSpeedError[latestNum])+(SKi*rightSpeedErrorIntegral())+(SKd*rightSpeedErrorDif());
+
+
 
     //float speedChange = (Kp*error[noErrorBuf-1])+Ki*(ErrorIntegral())+(Kd*ErrorDif());
 }
 
 void setMotorSpeed(int change){
     if(change<0)
-        RDutyCycle -= abs(change);
+        RDutyCycle -= abs(change)+leftSpeedChange;
     else
-        LDutyCycle -= change;
+        LDutyCycle -= change+rightSpeedChange;
 }
 ///////////////////////////////////////////////////////////////////////////////above main function
 ///////////////////////////////////////////////////////////////////////////////below sub function
@@ -78,7 +122,7 @@ int isLineMid(int sensorVal, int* LED)                          //ticker
 }
 
 
-float ErrorIntegral(){
+float errorIntegral(){
     float value=0;
     for(int i=0; i<noErrorBuf; i++){
         value += error[i];
@@ -86,9 +130,38 @@ float ErrorIntegral(){
     return value;
 }
 
-float ErrorDif(){
-    return (error[noErrorBuf-1]-error[noErrorBuf-2]);
+float errorDif(){
+    return (error[latestNum]-error[latestNum+1]);
 }
+
+float leftSpeedErrorIntegral(){
+    float value=0;
+    for(int i=0; i<noErrorBuf; i++){
+        value += leftSpeedError[i];
+    }
+    return value;
+}
+
+float leftSpeedErrorDif(){
+    return (leftSpeedError[latestNum]-leftSpeedError[latestNum+1]);
+}
+
+float rightSpeedErrorIntegral(){
+    float value=0;
+    for(int i=0; i<noErrorBuf; i++){
+        value += rightSpeedError[i];
+    }
+    return value;
+}
+
+float rightSpeedErrorDif(){
+    return (rightSpeedError[latestNum]-rightSpeedError[latestNum+1]);
+}
+
+
+
+
+
 
 
 
