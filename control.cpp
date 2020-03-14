@@ -1,51 +1,4 @@
-#include <iostream>
-#include <math.h>
-
-const int noSensor = 6
-const float radius = 0.07;
-int latestNum = 0;
-int noErrorBuf = 20;
-float Kp, Ki, Kd;
-float SKp, SKi, SKd;
-float latestError;
-float error[noErrorBuf] = 0;
-float leftSpeedError[noErrorBuf] = 0;
-float rightSpeedError[noErrorBuf] = 0;
-float change;
-float desiredSpdVal = 100;
-float LSpd, RSpd;
-float prevRSpd[20], prevLSpd[20];
-float leftSpeedChange = 0;
-float rightSpeedChange = 0;
-
-
-
-void isLineBroken(float sensorVal,float* prevRspeed,float* prevLspeed){};
-void calError() {};
-void calSpdError(){};
-void PID(){};
-void spdPID(){};
-void setMotorSpeed(int change){};
-void calSpeedLeft(){};
-void calSpeedRight(){};
-int isLineMid(int sensorVal, int* LED){};
-float errorIntegral(){};
-float errorDif(){};
-float leftSpeedErrorIntegral(){};
-float leftSpeedErrorDif(){};
-float rightSpeedErrorIntegral(){};
-float rightSpeedErrorDif(){};
-void setMotorSpeedRight(int Rspeed){};
-void setMotorSpeedLeft(int Lspeed){};
-void onLineBreak(float* prevRspeed, float* prevLspeed){};
-
-
-
-
-
-void getLeftEncValue();
-void getRightEncValue();
-
+#include "control.h"
 
 void isLineBroken(float sensorVal,float* prevRspeed,float* prevLspeed)                            //interrupt ticker
 {
@@ -57,7 +10,8 @@ void isLineBroken(float sensorVal,float* prevRspeed,float* prevLspeed)          
 
     if(cnt < 1)
     {
-         onLineBreak();
+            setMotorSpeedLeft(&prevLSpd[10]);
+            setMotorSpeedRight(&prevRSpd[10]);
     }
 }
 
@@ -92,17 +46,16 @@ void PID(){
 void spdPID(){
     leftSpeedChange = (SKp*leftSpeedError[latestNum])+(SKi*leftSpeedErrorIntegral())+(SKd*leftSpeedErrorDif());
     rightSpeedChange = (SKp*rightSpeedError[latestNum])+(SKi*rightSpeedErrorIntegral())+(SKd*rightSpeedErrorDif());
-
-
-
-    //float speedChange = (Kp*error[noErrorBuf-1])+Ki*(ErrorIntegral())+(Kd*ErrorDif());
 }
 
 void setMotorSpeed(int change){
     if(change<0)
-        RDutyCycle -= abs(change)+leftSpeedChange;
+        RDutyCycle -= abs(change);
     else
-        LDutyCycle -= change+rightSpeedChange;
+        LDutyCycle -= change;
+
+    RDutyCycle += rightSpeedChange;
+    LDutyCycle += leftSpeedChange;
 }
 ///////////////////////////////////////////////////////////////////////////////above main function
 ///////////////////////////////////////////////////////////////////////////////below sub function
@@ -160,18 +113,12 @@ float rightSpeedErrorDif(){
 
 
 
-
-
-
-
-
-
-void setMotorSpeedRight(int Rspeed){
-    RDutyCycle = Rspeed;
+void setMotorSpeedRight(int* RS){               // In case of Bluetooth like forced circumstances. Pointer due to array values
+    RDutyCycle = RS;
 }
 
-void setMotorSpeedLeft(int Lspeed){
-    LDutyCycle = Lspeed;
+void setMotorSpeedLeft(int* LS){
+    LDutyCycle = LS;
 }
 
 
@@ -181,9 +128,6 @@ void onLineBreak(float* prevRspeed, float* prevLspeed){            //interrupt (
         setMotorSpeedRight(*prevRspeed);
         setMotorSpeedLeft(*prevLspeed); 
 }
-
-
-///m/s 알았으니까 4cm 가는데 몇초 걸리는지 계산하고 난뒤 처음 라인 브레이크 후에 몇초뒤에 센싱하는지 계산
 
 
 
@@ -199,20 +143,6 @@ int main() {
     3. sensor values goes to calError()
     4. error[20] value goes to PID() andd error[0-19] used forr. integral
     5. change value from PID() goes to setMotorSpeed()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
